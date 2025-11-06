@@ -1,0 +1,17 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+nav {
+    background-color: #007bff;
+    padding: 10px;
+}
+
+nav a {
+    color: white;
+    margin-right: 10px;
+}
+
+.container {
+    padding: 20px;
+}

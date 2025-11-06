@@ -1,0 +1,90 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f8f9fc;
+}
+
+nav {
+    background: #007bff;
+    padding: 15px;
+    box-shadow: 0 4px 20px rgba(0, 123, 255, 0.3);
+}
+
+nav a {
+    color: white;
+    margin: 0 20px;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #007bff;
+    margin-bottom: 30px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+table th {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    padding: 20px;
+    font-size: 17px;
+}
+
+table td {
+    padding: 18px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+table tr:hover {
+    background-color: #f1f5ff;
+}
+
+.status-paid {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-weight: 600;
+}
+
+.status-unpaid {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-weight: 600;
+}
+
+button {
+    padding: 10px 20px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #c82333;
+}
