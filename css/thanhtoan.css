@@ -1,4 +1,4 @@
-* {
+/* * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -84,4 +84,122 @@ form button {
 form button:hover {
     transform: translateY(-3px);
     box-shadow: 0 10px 25px rgba(40, 167, 69, 0.4);
+} */
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; color: #333; }
+
+.container {
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.container::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #007bff, #28a745, #ffc107);
+}
+
+h1 {
+    text-align: center;
+    color: #1e3c72;
+    margin-bottom: 25px;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.invoice-info {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 15px;
+    margin: 20px 0;
+    font-size: 18px;
+    line-height: 2;
+    border-left: 5px solid #007bff;
+}
+
+.bill-details {
+    margin: 30px 0;
+}
+
+.bill-details h2 {
+    color: #1e3c72;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.bill-details table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #f8f9fa;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.bill-details th {
+    background: #007bff;
+    color: white;
+    padding: 15px;
+}
+
+.bill-details td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+.total-amount {
+    font-size: 38px;
+    font-weight: 800;
+    color: #28a745;
+    text-align: center;
+    margin: 30px 0;
+    text-shadow: 0 2px 10px rgba(40,167,69,0.3);
+}
+
+form select {
+    width: 100%;
+    padding: 16px;
+    font-size: 18px;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    margin: 20px 0;
+}
+
+form button {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 22px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.4s;
+}
+
+form button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(40, 167, 69, 0.4);
+}
+
+.paid-stamp {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-20deg);
+    font-size: 80px;
+    font-weight: 900;
+    color: rgba(40, 167, 69, 0.2);
+    pointer-events: none;
+    z-index: 1;
 }

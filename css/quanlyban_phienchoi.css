@@ -152,6 +152,89 @@ button:hover {
     transform: translateY(-1px);
 }
 
+/* Giữ nguyên toàn bộ CSS cũ của cậu + thêm phần này */
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.status-available { background: #d4edda; color: #155724; }
+.status-playing { background: #fff3cd; color: #856404; }
+.status-maintenance { background: #f8d7da; color: #721c24; }
+
+.btn-start {
+    background: #28a745 !important;
+    color: white !important;
+    font-weight: 600;
+}
+
+.btn-pay {
+    background: #ffc107 !important;
+    color: #212529 !important;
+    font-weight: 600;
+}
+
+.btn-delete {
+    background: #dc3545 !important;
+    color: white !important;
+}
+
+button[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Đảm bảo nút Thanh Toán hiện đẹp */
+.actions {
+    white-space: nowrap;
+}
+
+.actions button {
+    margin: 3px 2px;
+    padding: 8px 12px;
+    font-size: 13px;
+    min-width: 80px;
+}
+
+.btn-pay {
+    background: linear-gradient(135deg, #ffc107, #e0a800) !important;
+    color: #212529 !important;
+    font-weight: 700;
+    border: 2px solid #ffc107;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+}
+
+.btn-start {
+    background: linear-gradient(135deg, #28a745, #1e7e34) !important;
+    color: white !important;
+    font-weight: 700;
+}
+
+
+
+/* Responsive */
+@media (max-width: 768px) {
+    table td {
+        font-size: 13px;
+        padding: 10px 5px;
+    }
+    button {
+        padding: 6px 10px;
+        font-size: 12px;
+        margin: 2px;
+    }
+}
+
+
 @media (max-width: 768px) {
     .container {
         padding: 10px;

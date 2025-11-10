@@ -168,5 +168,53 @@ switch ($action) {
     case 'get_active_tables':
         echo json_encode(['active' => $reportsController->getActiveTables()]);
         break;
+
+    case 'start_session':
+        if (!isset($_POST['table_id'])) {
+            echo json_encode(['success' => false, 'message' => 'Thiếu ID bàn']);
+            exit;
+        }
+        $tableId = (int)$_POST['table_id'];
+        
+        // Kiểm tra bàn có trống không
+        $stmt = $pdo->prepare("SELECT Status FROM Tables WHERE TableID = ?");
+        $stmt->execute([$tableId]);
+        $status = $stmt->fetchColumn();
+        
+        if ($status !== 'Available') {
+            echo json_encode(['success' => false, 'message' => 'Bàn không trống!']);
+            exit;
+        }
+        
+        // Tạo hóa đơn mới
+        $stmt = $pdo->prepare("INSERT INTO Invoices (TableID, StartTime, InvoiceDate) VALUES (?, NOW(), CURDATE())");
+        $stmt->execute([$tableId]);
+        $invoiceId = $pdo->lastInsertId();
+        
+        // Cập nhật trạng thái bàn
+        $stmt = $pdo->prepare("UPDATE Tables SET Status = 'Playing' WHERE TableID = ?");
+        $stmt->execute([$tableId]);
+        
+        echo json_encode(['success' => true, 'invoice_id' => $invoiceId]);
+        break;
+
+    case 'confirm_payment':
+    $id = $_POST['id'] ?? 0;
+    $method = $_POST['paymentMethod'] ?? 'Cash';
+    $total = $_POST['total_amount'] ?? 0;
+
+    $stmt = $pdo->prepare("UPDATE Invoices SET EndTime = NOW(), TimePlay = TIMESTAMPDIFF(MINUTE, StartTime, NOW())/60, TotalAmount = ?, PaymentMethod = ?, IsPaid = 1 WHERE InvoiceID = ? AND IsPaid = 0");
+    $result = $stmt->execute([$total, $method, $id]);
+
+    if ($result) {
+        // Cập nhật bàn về trống
+        $stmt = $pdo->prepare("UPDATE Tables SET Status = 'Available' WHERE TableID = (SELECT TableID FROM Invoices WHERE InvoiceID = ?)");
+        $stmt->execute([$id]);
+        
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Hóa đơn đã thanh toán hoặc lỗi!']);
+    }
+    break;
 }
 ?>

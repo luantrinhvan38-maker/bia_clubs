@@ -2,6 +2,36 @@ document.addEventListener('DOMContentLoaded', function () {
     // Tạo bàn mới
     document.getElementById('createTableForm')?.addEventListener('submit', createTable);
 
+
+
+    // === HÀM MỚI: BẮT ĐẦU CHƠI ===
+    window.startPlaying = function(tableId) {
+        if (!confirm('Bắt đầu phiên chơi cho bàn này?')) return;
+
+        const formData = new FormData();
+        formData.append('table_id', tableId);
+
+        showLoading();
+        fetch('../backend/routes.php?action=start_session', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+            if (data.success) {
+                showToast('Đã mở hóa đơn! Bàn chuyển sang ĐANG CHƠI', 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showToast(data.message || 'Lỗi khi mở hóa đơn!', 'error');
+            }
+        })
+        .catch(() => {
+            hideLoading();
+            showToast('Lỗi kết nối!', 'error');
+        });
+    };
+
     // Cập nhật trạng thái bàn
     window.updateStatus = function(tableId, status) {
         const formData = new FormData();
