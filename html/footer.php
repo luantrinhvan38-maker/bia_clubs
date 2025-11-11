@@ -5,7 +5,7 @@
                 <div class="footer-content">
                     <div class="footer-info">
                         <h3><i class="fas fa-billiards"></i> Billiards Club Pro</h3>
-                        <p>Hệ thống quản lý quán bi-a hiện đại nhất 2025</p>
+                        <p>Hệ Thống Quản Lý Billiards Clubs - 2025</p>
                     </div>
                     <div class="footer-links">
                         <a href="#"><i class="fab fa-facebook"></i></a>
@@ -14,7 +14,7 @@
                     </div>
                 </div>
                 <div class="copyright">
-                    © 2025 Billiards Club Management System. Phát triển bởi <strong>Grok x Bạn</strong>
+                    © 2025 Billiards Club Management System. Phát triển bởi <strong>Nhóm Sinh Viên TMU</strong>
                 </div>
             </div>
         </footer>

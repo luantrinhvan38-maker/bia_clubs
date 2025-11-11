@@ -16,7 +16,7 @@ function confirmPayment(e) {
         if (data.success) {
             showToast('Thanh toán thành công!', 'success');
             setTimeout(() => {
-                window.location.href = 'quanlyhoadon.php'; // nếu lỗi thì đổi thành quanlyban_phienchoi.php
+                window.location.href = 'quanlyban_phienchoi.php'; // nếu lỗi thì đổi thành quanlyban_phienchoi.php
             }, 1500);
         } else {
             showToast('Lỗi thanh toán!', 'error');
