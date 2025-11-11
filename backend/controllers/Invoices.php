@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../models/Invoice.php';
+require_once __DIR__ . '/../models/InvoiceDetail.php';
 
 class InvoicesController {
     private $pdo;
@@ -27,6 +28,11 @@ class InvoicesController {
     }
 
     public function deleteInvoice($id) {
+        // Xóa bản ghi chi tiết hóa đơn trước (InvoiceDetails)
+        $stmt = $this->pdo->prepare("DELETE FROM InvoiceDetails WHERE InvoiceID = ?");
+        $stmt->execute([$id]);
+        
+        // Sau đó xóa hóa đơn
         return $this->invoiceModel->delete($id);
     }
 }

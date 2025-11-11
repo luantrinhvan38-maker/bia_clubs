@@ -5,42 +5,16 @@ require_once __DIR__ . '/../backend/controllers/Pos.php';
 
 $posController = new PosController($pdo);
 // Giả sử lấy invoice ID từ GET hoặc session
-$invoiceId = $_GET['id'] ?? 0;
-// Lấy hóa đơn theo ID
-$invoice = $posController->getInvoiceById($invoiceId);
-
-if (!$invoice || $invoice['IsPaid']) {
-    echo '<div class="container"><h2 style="color:red;text-align:center;">Hóa đơn không tồn tại hoặc đã thanh toán!</h2></div>';
-    require_once 'footer.php';
-    exit;
-}
-
-// LẤY THÔNG TIN BÀN
-$stmt = $pdo->prepare("SELECT TableName, HourlyRate FROM Tables WHERE TableID = ?");
-$stmt->execute([$invoice['TableID']]);
-$table = $stmt->fetch(PDO::FETCH_ASSOC);
-
-// TÍNH TIỀN REALTIME
-$startTime = new DateTime($invoice['StartTime']);
-$endTime = $invoice['EndTime'] ? new DateTime($invoice['EndTime']) : new DateTime();
-$hoursPlayed = $startTime->diff($endTime)->h + ($startTime->diff($endTime)->i / 60);
-$hoursPlayed = round($hoursPlayed + ($startTime->diff($endTime)->days * 24), 2);
-
-$tableFee = $hoursPlayed * $table['HourlyRate'];
-
-// LẤY DỊCH VỤ ĐÃ ORDER
+// Lấy tất cả bàn đang chơi
 $stmt = $pdo->prepare("
-    SELECT s.ServiceName, id.Numbers, id.Price_Services 
-    FROM InvoiceDetails id 
-    JOIN Services s ON id.ServiceID = s.ServiceID 
-    WHERE id.InvoiceID = ?
+    SELECT t.TableID, t.TableName, t.HourlyRate, i.InvoiceID, i.StartTime
+    FROM Tables t
+    JOIN Invoices i ON t.TableID = i.TableID
+    WHERE t.Status = 'Playing' AND i.EndTime IS NULL AND i.IsPaid = 0
+    ORDER BY i.StartTime DESC
 ");
-$stmt->execute([$invoiceId]);
-$services = $stmt->fetchAll(PDO::FETCH_ASSOC);
-$serviceTotal = array_sum(array_column($services, 'Price_Services'));
-
-// TỔNG TIỀN
-$totalAmount = $tableFee + $serviceTotal;
+$stmt->execute();
+$playingTables = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -52,59 +26,85 @@ $totalAmount = $tableFee + $serviceTotal;
     <link rel="stylesheet" href="../css/thanhtoan.css">
 </head>
 <body>
-    <div class="container">
-    <h1>Thanh Toán Hóa Đơn #<?php echo $invoice['InvoiceID']; ?></h1>
+    <div class="container pos-container">
+        <h1>QUẢN LÝ HÓA ĐƠN - POS</h1>
+        <p style="text-align:center;color:#666;margin-bottom:20px;">Click vào bàn để xem & thêm món</p>
 
-    <div class="invoice-info">
-        <p><strong>Bàn:</strong> <?php echo htmlspecialchars($table['TableName']); ?></p>
-        <p><strong>Giờ vào:</strong> <?php echo date('d/m/Y H:i', strtotime($invoice['StartTime'])); ?></p>
-        <p><strong>Giờ ra:</strong> 
-            <?php echo $invoice['EndTime'] ? date('d/m/Y H:i', strtotime($invoice['EndTime'])) : '<span style="color:#dc3545;">Đang chơi...</span>'; ?>
-        </p>
-        <p><strong>Thời gian chơi:</strong> <span style="color:#007bff;font-weight:600;"><?php echo number_format($hoursPlayed, 2); ?> giờ</span></p>
+        <?php if (empty($playingTables)): ?>
+            <div class="no-table">
+                <i class="fas fa-table"></i>
+                <p>Không có bàn nào đang chơi</p>
+                <a href="quanlyban_phienchoi.php" class="btn-back">Quay lại quản lý bàn</a>
+            </div>
+        <?php else: ?>
+            <div class="tables-grid">
+                <?php foreach ($playingTables as $table): ?>
+                    <div class="table-card" onclick="openInvoice(<?php echo $table['InvoiceID']; ?>, <?php echo $table['TableID']; ?>)">
+                        <div class="table-name"><?php echo htmlspecialchars($table['TableName']); ?></div>
+                        <div class="table-info">
+                            <span>Hóa đơn #<?php echo $table['InvoiceID']; ?></span>
+                            <span><?php echo date('H:i', strtotime($table['StartTime'])); ?> vào</span>
+                        </div>
+                        <div class="table-price"><?php echo number_format($table['HourlyRate']); ?>₫/giờ</div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </div>
 
-    <div class="bill-details">
-        <h2>Chi Tiết Hóa Đơn</h2>
-        <table>
-            <tr><th>Dịch vụ</th><th>Số lượng</th><th>Thành tiền</th></tr>
-            <tr>
-                <td>Thuê bàn (<?php echo number_format($table['HourlyRate']); ?>₫/giờ)</td>
-                <td><?php echo number_format($hoursPlayed, 2); ?> giờ</td>
-                <td><?php echo number_format($tableFee); ?>₫</td>
-            </tr>
-            <?php foreach ($services as $item): ?>
-            <tr>
-                <td><?php echo htmlspecialchars($item['ServiceName']); ?></td>
-                <td>x<?php echo $item['Numbers']; ?></td>
-                <td><?php echo number_format($item['Price_Services']); ?>₫</td>
-            </tr>
-            <?php endforeach; ?>
-            <?php if (empty($services)): ?>
-            <tr><td colspan="3" style="text-align:center;color:#666;">Chưa gọi món</td></tr>
-            <?php endif; ?>
-        </table>
+    <!-- Popup chi tiết hóa đơn -->
+    <div id="invoiceModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Hóa Đơn <span id="modalInvoiceId"></span> - <span id="modalTableName"></span></h2>
+            
+            <div class="invoice-details">
+                <div class="info-row">
+                    <span>Giờ vào:</span>
+                    <span id="startTime"></span>
+                </div>
+                <div class="info-row">
+                    <span>Thời gian chơi:</span>
+                    <span id="playTime">Đang tính...</span>
+                </div>
+                <div class="info-row">
+                    <span>Tiền bàn:</span>
+                    <span id="tableFee">0₫</span>
+                </div>
+            </div>
+
+            <div class="services-list">
+                <h3>Dịch vụ đã gọi</h3>
+                <table id="servicesTable">
+                    <thead>
+                        <tr><th>Món</th><th>SL</th><th>Giá</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="add-service">
+                <h3>Thêm món</h3>
+                <select id="serviceSelect"></select>
+                <input type="number" id="quantity" min="1" value="1" style="width:70px;">
+                <button onclick="addService()">Thêm</button>
+            </div>
+
+            <div class="total-section">
+                <div class="total-label">TỔNG TIỀN:</div>
+                <div class="total-amount" id="totalAmount">0₫</div>
+            </div>
+
+            <div class="payment-actions">
+                <select id="paymentMethod">
+                    <option value="Cash">Tiền mặt</option>
+                    <option value="Card">Thẻ</option>
+                    <option value="Other">Chuyển khoản</option>
+                </select>
+                <button class="btn-pay-final" onclick="confirmPayment()">THANH TOÁN</button>
+            </div>
+        </div>
     </div>
-
-    <div class="total-amount">
-        TỔNG TIỀN: <?php echo number_format($totalAmount); ?> ₫
-    </div>
-
-    <form id="paymentForm" onsubmit="confirmPayment(event)">
-        <input type="hidden" name="id" value="<?php echo $invoiceId; ?>">
-        <input type="hidden" name="total_amount" value="<?php echo $totalAmount; ?>">
-        <select name="paymentMethod" required>
-            <option value="Cash" <?php echo $invoice['PaymentMethod'] == 'Cash' ? 'selected' : ''; ?>>Tiền mặt</option>
-            <option value="Card" <?php echo $invoice['PaymentMethod'] == 'Card' ? 'selected' : ''; ?>>Thẻ ngân hàng</option>
-            <option value="Other" <?php echo $invoice['PaymentMethod'] == 'Other' ? 'selected' : ''; ?>>Chuyển khoản / Ví</option>
-        </select>
-        <button type="submit">XÁC NHẬN THANH TOÁN</button>
-    </form>
-
-    <?php if ($invoice['IsPaid']): ?>
-        <div class="paid-stamp">ĐÃ THANH TOÁN</div>
-    <?php endif; ?>
-</div>
 
     <?php require_once 'footer.php'; ?>
     <script src="../js/thanhtoan.js"></script>

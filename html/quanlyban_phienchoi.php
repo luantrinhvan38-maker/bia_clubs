@@ -73,14 +73,13 @@ $tables = $tablesController->getAllTables();
                     
                     <?php 
                     // ÉP KIỂM TRA SIÊU CHẮC CHẮN
-                    $hasActiveInvoice = ($table['Status'] == 'Playing' && $invoice !== null && is_array($invoice) && isset($invoice['InvoiceID']));
+                    $hasActiveInvoice = ($table['Status'] == 'Playing');
                     if ($hasActiveInvoice): 
                     ?>
-                        <button class="btn-pay" onclick="window.location.href='thanhtoan.php?id=<?php echo $invoice['InvoiceID']; ?>'">
-                            Thanh Toán #<?php echo $invoice['InvoiceID']; ?>
+                        <button class="btn-pay" onclick="window.location.href='thanhtoan.php'">
+                            Quản lý hóa đơn
                         </button>
                     <?php endif; ?>
-
                     <button onclick="updateStatus(<?php echo $table['TableID']; ?>, 'Available')" <?php echo $table['Status'] == 'Available' ? 'disabled' : ''; ?>>Trống</button>
                     <button onclick="updateStatus(<?php echo $table['TableID']; ?>, 'Playing')" <?php echo $table['Status'] == 'Playing' ? 'disabled' : ''; ?>>Đang chơi</button>
                     <button onclick="updateStatus(<?php echo $table['TableID']; ?>, 'Maintenance')" <?php echo $table['Status'] == 'Maintenance' ? 'disabled' : ''; ?>>Bảo trì</button>

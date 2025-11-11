@@ -2,6 +2,20 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('createServiceForm')?.addEventListener('submit', createService);
 });
 
+// Helper functions
+function showLoading() {
+    console.log('Loading...');
+}
+
+function hideLoading() {
+    console.log('Done loading');
+}
+
+function showToast(message, type = 'success') {
+    console.log(`[${type.toUpperCase()}] ${message}`);
+    alert(message);
+}
+
 window.deleteService = function(serviceId) {
     if (!confirm('Xóa dịch vụ này? Dữ liệu không thể khôi phục!')) return;
 
@@ -22,6 +36,11 @@ window.deleteService = function(serviceId) {
         } else {
             showToast('Không thể xóa dịch vụ đang được sử dụng!', 'error');
         }
+    })
+    .catch(err => {
+        hideLoading();
+        console.error('Lỗi xóa dịch vụ:', err);
+        showToast('Lỗi: ' + err.message, 'error');
     });
 };
 
@@ -41,14 +60,15 @@ function createService(e) {
         if (data.success) {
             showToast('Thêm dịch vụ thành công!', 'success');
             form.reset();
-            setTimeout(() => location.reload(), 1000);
+            // Reload lại danh sách dịch vụ
+            location.reload();
         } else {
-            showToast('Lỗi: Tên dịch vụ đã tồn tại!', 'error');
+            showToast('Lỗi: ' + (data.error || 'Không thể thêm dịch vụ!'), 'error');
         }
+    })
+    .catch(err => {
+        hideLoading();
+        console.error('Lỗi thêm dịch vụ:', err);
+        showToast('Lỗi: ' + err.message, 'error');
     });
 }
-
-// Re-use loading & toast từ file trước
-function showLoading() { /* same as above */ }
-function hideLoading() { /* same as above */ }
-function showToast(message, type = 'success') { /* same as above */ }

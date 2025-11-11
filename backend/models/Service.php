@@ -20,6 +20,12 @@ class ServiceModel {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function getByName($name) {
+        $stmt = $this->pdo->prepare("SELECT * FROM Services WHERE ServiceName = ? LIMIT 1");
+        $stmt->execute([$name]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function create($data) {
         $stmt = $this->pdo->prepare("INSERT INTO Services (ServiceName, Price_Service, Category, Numbers) VALUES (?, ?, ?, ?)");
         return $stmt->execute([$data['ServiceName'], $data['Price_Service'], $data['Category'], $data['Numbers']]);

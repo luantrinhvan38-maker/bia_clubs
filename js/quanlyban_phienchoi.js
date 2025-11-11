@@ -16,18 +16,29 @@ document.addEventListener('DOMContentLoaded', function () {
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(response => {
+            // đọc raw text để debug trong trường hợp server trả về HTML/ lỗi
+            return response.text().then(text => ({ ok: response.ok, status: response.status, text }));
+        })
+        .then(obj => {
             hideLoading();
-            if (data.success) {
-                showToast('Đã mở hóa đơn! Bàn chuyển sang ĐANG CHƠI', 'success');
-                setTimeout(() => location.reload(), 1000);
-            } else {
-                showToast(data.message || 'Lỗi khi mở hóa đơn!', 'error');
+            console.log('start_session raw response:', obj);
+            try {
+                const data = JSON.parse(obj.text);
+                if (data.success) {
+                    showToast('Đã mở hóa đơn! Bàn chuyển sang ĐANG CHƠI', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(data.message || data.error || 'Lỗi khi mở hóa đơn!', 'error');
+                }
+            } catch (e) {
+                console.error('Không thể parse JSON từ start_session:', e, obj.text);
+                showToast('Lỗi phản hồi từ server. Kiểm tra console để biết chi tiết.', 'error');
             }
         })
-        .catch(() => {
+        .catch(err => {
             hideLoading();
+            console.error('Fetch error start_session:', err);
             showToast('Lỗi kết nối!', 'error');
         });
     };

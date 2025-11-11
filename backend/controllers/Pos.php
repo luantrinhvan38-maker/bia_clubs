@@ -1,17 +1,37 @@
 <?php
 require_once __DIR__ . '/../models/Invoice.php';
+require_once __DIR__ . '/../models/Table.php';
+require_once __DIR__ . '/Tables.php';
 
 class PosController {
     private $pdo;
     private $invoiceModel;
+    private $tablesController;
 
     public function __construct($pdo) {
         $this->pdo = $pdo;
         $this->invoiceModel = new InvoiceModel($pdo);
+        $this->tablesController = new TablesController($pdo);
     }
 
     public function confirmPayment($id, $paymentMethod) {
-        return $this->invoiceModel->confirmPayment($id, $paymentMethod, true);
+        $invoice = $this->invoiceModel->getById($id);
+        if (!$invoice) {
+            return false;
+        }
+        
+        // Trước khi xác nhận thanh toán, gọi endSession để cập nhật EndTime, TimePlay, TotalAmount
+        $this->tablesController->endSession($id);
+        
+        // Sau đó cập nhật PaymentMethod và IsPaid
+        $result = $this->invoiceModel->confirmPayment($id, $paymentMethod, true);
+        
+        // Cập nhật trạng thái bàn về Available
+        if (isset($invoice['TableID'])) {
+            $tableModel = new TableModel($this->pdo);
+            $tableModel->updateStatus($invoice['TableID'], 'Available');
+        }
+        return $result;
     }
 
     public function getInvoiceById($id) {
